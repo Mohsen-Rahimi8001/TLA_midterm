@@ -142,19 +142,84 @@ def union(fa1:VisualDFA|VisualNFA, fa2:VisualDFA|VisualNFA) -> dict:
 
     return res
 
-def concatenation(fa1, fa2) -> dict:
-    pass
+def concat(fa1:VisualDFA|VisualNFA, fa2:VisualDFA|VisualNFA) -> dict:
+    new_fi = 'q1'
+    
+    new_states = set()
+    for i in range(len(fa1.states)):
+        new_states.add(f"q{i}1")
 
+    for i in range(len(fa2.states)):
+        new_states.add(f"q{i}2")
+    
+    res = {
+    "states": new_states,
+    "input_symbols": set(fa1.input_symbols).union(fa2.input_symbols),
+    "transitions": dict(),
+    "final_states": str({new_fi}),
+    "initial_state": fa1.initial_state + "1"
+    }
 
-path1 = os.path.join('.', 'Packages', 'samples', 'phase4-sample', 'union', 'in', 'FA1.json')
-path2 = os.path.join('.', 'Packages', 'samples', 'phase4-sample', 'union', 'in', 'FA2.json')
+    for state, value in fa1.transitions.items():
+        new_transition = dict()
+        for symbol, targetset in value.items():
+            new_transition[symbol] = set()
+            for target in targetset:
+                new_transition[symbol].add(target+"1")
+            
+            if symbol != "" or state not in fa1.final_states:
+                new_transition[symbol] = str(new_transition[symbol])
+            else:
+                new_transition[symbol] = new_transition[symbol]
+
+        res['transitions'][state+"1"] = new_transition
+
+    for state in fa1.final_states:
+        state_name = state + "1"
+
+        if res['transitions'][state_name].get(""):
+            res["transitions"][state_name][""].add(fa2.initial_state + "2")
+        else:
+            res["transitions"][state_name][""] = str({fa2.initial_state + "2"})
+
+    for state, value in fa2.transitions.items():
+        new_transition = dict()
+        for symbol, targetset in value.items():
+            new_transition[symbol] = set()
+            for target in targetset:
+                new_transition[symbol].add(target+"2")
+            
+            if symbol != "" or state not in fa2.final_states:
+                new_transition[symbol] = str(new_transition[symbol])
+            else:
+                new_transition[symbol] = new_transition[symbol]
+
+        res['transitions'][state+"2"] = new_transition
+
+    for state in fa2.final_states:
+        state_name = state + "2"
+
+        if res['transitions'][state_name].get(""):
+            res["transitions"][state_name][""].add(new_fi)
+        else:
+            res["transitions"][state_name][""] = str({new_fi})
+
+    res["states"].add(new_fi)
+
+    res['input_symbols'] = str(res['input_symbols'])
+    res['states'] = str(res['states'])
+
+    return res
+
+path1 = os.path.join('.', 'Packages', 'samples', 'phase4-sample', 'concat', 'in', 'FA1.json')
+path2 = os.path.join('.', 'Packages', 'samples', 'phase4-sample', 'concat', 'in', 'FA2.json')
 
 fa1 = get_fa(path1)
 fa2 = get_fa(path2)
 if not fa1 or not fa2:
     raise Exception("Json files you provided are neither nfa nor dfa.")
 
-res = union(fa1, fa2)
+res = concat(fa1, fa2)
 
 import json
 
