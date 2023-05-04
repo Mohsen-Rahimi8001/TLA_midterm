@@ -211,15 +211,37 @@ def concat(fa1:VisualDFA|VisualNFA, fa2:VisualDFA|VisualNFA) -> dict:
 
     return res
 
-path1 = os.path.join('.', 'Packages', 'samples', 'phase4-sample', 'concat', 'in', 'FA1.json')
-path2 = os.path.join('.', 'Packages', 'samples', 'phase4-sample', 'concat', 'in', 'FA2.json')
+operation = input("Enter the operation you want to perform:(star, concat, union) ")
 
-fa1 = get_fa(path1)
-fa2 = get_fa(path2)
-if not fa1 or not fa2:
-    raise Exception("Json files you provided are neither nfa nor dfa.")
+if operation.lower() in ["concat", "union"]:
 
-res = concat(fa1, fa2)
+    path1 = input("Enter the first fa file path: ")
+    if not os.path.isfile(path1):
+        raise FileNotFoundError(f"the path {path1} you provided is invalid.")
+
+    path2 = input("Enter the second fa file path: ")
+    if not os.path.isfile(path2):
+        raise FileNotFoundError(f"the path {path2} you provided is invalid.")
+
+    fa1 = get_fa(path1)
+    fa2 = get_fa(path2)
+    if not fa1 or not fa2:
+        raise Exception("Json files you provided are neither nfa nor dfa.")
+
+    res = concat(fa1, fa2) if operation.lower() == 'concat' else union(fa1, fa2)
+
+elif operation.lower() == "star":
+
+    path1 = input("Enter the first fa file path: ")
+    if not os.path.isfile(path1):
+        raise FileNotFoundError(f"the path {path1} you provided is invalid.")
+
+    fa1 = get_fa(path1)
+    if not fa1:
+        raise Exception("the json file you provided is neither nfa nor dfa.")
+
+    res = star(fa1)
+
 
 import json
 
