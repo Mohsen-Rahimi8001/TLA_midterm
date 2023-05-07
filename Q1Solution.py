@@ -111,5 +111,5 @@ res["transitions"] = new_transition_dict
 
 import json
 
-with open("NFA.json", "w+") as f:
+with open("DFA.json", "w+") as f:
   json.dump(res, f, indent=4)
